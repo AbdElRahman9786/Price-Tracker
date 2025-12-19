@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,7 +23,9 @@ export default function RootLayout({ children }) {
       <body
        className="bg-gradient-to-b from-white via-orange-100 to-orange-200 min-h-screen font-sans"
       >
+        
         {children}
+        
       </body>
     </html>
   );
