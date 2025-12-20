@@ -40,7 +40,7 @@ export const AddProductForm = () => {
 
   return (
     <form className='my-20 text-center' onSubmit={(e)=>handleSubmit(e)}>
-        <div className="flex w-[50%] mx-auto items-center">
+        <div className="flex w-[50%] mx-auto items-center max-sm:w-full max-sm:px-5">
         <Input type="url" placeholder="Enter product URL" value={url} className=" mx-auto block rounded-l-xl border border-gray-300 p-5 shadow-md focus:outline-none focus:ring-2 focus:ring-orange-400" onChange={(e)=>handelChange(e)} />
         <Button type="submit" disabled={loading} className=" bg-[#f3701c] text-white rounded-r-xl px-6 py-5 shadow-lg hover:bg-orange-500 transition-colors duration-300 disabled:opacity-50">
           {loading ? "Tracking..." : "Track Price"}

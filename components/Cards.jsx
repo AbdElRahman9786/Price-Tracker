@@ -16,7 +16,7 @@ export const Cards = () => {
         }
     ]
   return (
-    <div className='grid grid-cols-3 justify-center items-center gap-4 mt-10 max-w-6xl mx-auto'>
+    <div className='grid grid-cols-3 justify-center items-center gap-4 mt-10 max-w-6xl mx-auto max-md:grid-cols-2 max-sm:grid-cols-1 px-5'>
         {cards.map((card)=>{
             return(
                 <div key={card.id} className='bg-white/70 backdrop-blur-lg border border-white/30 shadow-lg rounded-2xl p-6 flex flex-col items-center text-center hover:scale-105 transition-transform duration-300 min-h-44'>
