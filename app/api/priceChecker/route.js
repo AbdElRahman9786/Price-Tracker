@@ -1,54 +1,69 @@
-import { getProducts } from "@/lib/action";
 import { sendPriceDropAlert } from "@/lib/email";
 import { scarpelWebsite } from "@/lib/fireCrawl";
 import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request) {
- const supabase=await createClient({
-    url:process.env.NEXT_PUBLIC_SUPABASE_URL,
-    key:process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
- })
+ const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY // Use service role key for server-side operations
+ );
 
- const user=await supabase.auth.getUser();
+ // Get all products from database (no user filter for cron job)
+ const { data: products, error: productsError } = await supabase
+   .from("products")
+   .select("*");
 
- if(!user){
-    return new Response(JSON.stringify({error:"User not authenticated"}),{status:401})
+ if (productsError) {
+    return new Response(JSON.stringify({ error: "Failed to fetch products" }), { status: 500 });
  }
 
- const data= await getProducts();
- let foundedChanges={
-    count:0,
-    name:[]
+ let foundedChanges = {
+    count: 0,
+    name: []
  };
 
- for(const product of data){
-    const scrapedData=await scarpelWebsite(product.url);
-    if(scrapedData && scrapedData.currentPrice && scrapedData.currentPrice !== product.price){
+ for (const product of products) {
+    const scrapedData = await scarpelWebsite(product.url);
+    if (scrapedData && scrapedData.currentPrice && scrapedData.currentPrice !== product.price) {
         // Update product price
         await supabase.from("products").update({
-            price:scrapedData.currentPrice,
-            currancy:scrapedData.currencyCode || "USD",
-        }).eq("id",product.id);
+            price: scrapedData.currentPrice,
+            currancy: scrapedData.currencyCode || "USD",
+        }).eq("id", product.id);
         foundedChanges.count++;
         foundedChanges.name.push(product.name);
 
         // Insert into price_history
         await supabase.from("price_history").insert({
-            product_id:product.id,
-            price:scrapedData.currentPrice,
-            currancy:scrapedData.currencyCode || "USD",
-            checked_at:new Date().toISOString(),
+            product_id: product.id,
+            price: scrapedData.currentPrice,
+            currancy: scrapedData.currencyCode || "USD",
+            checked_at: new Date().toISOString(),
         });
+
+        // Send email alert if price dropped
+        if (scrapedData.currentPrice < product.price) {
+            // Get user email
+            const { data: userData } = await supabase
+                .from("profiles")
+                .select("email")
+                .eq("id", product.user_id)
+                .single();
+            
+            if (userData?.email) {
+                await sendPriceDropAlert(
+                    userData.email,
+                    product,
+                    scrapedData.currentPrice,
+                );
+            }
+        }
     }
- if(foundedChanges.count > 0){
-    const emaolResult=await sendPriceDropAlert(
-        user.email,
-                product,
-                scrapedData.currentPrice,
-    ) 
- }
  }
 
-
-
+ return new Response(JSON.stringify({ 
+    success: true, 
+    updatedCount: foundedChanges.count,
+    updatedProducts: foundedChanges.name 
+ }), { status: 200 });
 }
