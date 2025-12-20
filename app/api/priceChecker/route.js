@@ -43,18 +43,15 @@ export async function POST(request) {
 
         // Send email alert if price dropped
         if (scrapedData.currentPrice < product.price) {
-            // Get user email
-            const { data: userData } = await supabase
-                .from("profiles")
-                .select("email")
-                .eq("id", product.user_id)
-                .single();
+            // Get user email from auth.users via service role
+            const { data: userData } = await supabase.auth.admin.getUserById(product.user_id);
             
-            if (userData?.email) {
+            if (userData?.user?.email) {
                 await sendPriceDropAlert(
-                    userData.email,
+                    userData.user.email,
                     product,
-                    scrapedData.currentPrice,
+                    product.price,           // oldPrice
+                    scrapedData.currentPrice // newPrice
                 );
             }
         }
