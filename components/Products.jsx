@@ -9,8 +9,18 @@ export const Products = async () => {
   const Supabase=await createClient(); 
   const {data:{user}}=await Supabase.auth.getUser();
 
+  // If no user is logged in, don't show products section
+  if (!user) {
+    return null;
+  }
 
-  let products=await getProducts();
+  let products = [];
+  try {
+    products = await getProducts();
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    products = [];
+  }
 
  
 
