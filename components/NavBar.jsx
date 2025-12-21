@@ -6,6 +6,7 @@ import { LogInIcon, LogOut } from 'lucide-react'
 import { SignInDialog } from './SignInDialog'
 import { TogleContext } from '@/context/togleContext'
 import { createClient } from '@/utils/supabase/client'
+import { redirect } from 'next/navigation'
 
 
 
@@ -33,6 +34,7 @@ export const NavBar = () => {
     supabase.auth.signOut().then(({error})=>{
       if(!error){
         setUser(null);
+        redirect('/');
       }
     })
   }

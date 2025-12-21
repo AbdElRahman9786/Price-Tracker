@@ -46,9 +46,9 @@ export async function POST(request) {
             // Get user email from auth.users via service role
             const { data: userData } = await supabase.auth.admin.getUserById(product.user_id);
             
-            if (userData?.user?.email) {
+            if (userData?.email) {
                 await sendPriceDropAlert(
-                    userData.user.email,
+                    userData.email,
                     product,
                     product.price,           // oldPrice
                     scrapedData.currentPrice // newPrice

@@ -8,28 +8,24 @@ import ProductCard from './ProductCard';
 export const Products = async () => {
   const Supabase=await createClient(); 
   const {data:{user}}=await Supabase.auth.getUser();
-
-  // If no user is logged in, don't show products section
-  if (!user) {
-    return null;
-  }
-
   let products = [];
+  // If no user is logged in, don't show products section
+  
+
   try {
     products = await getProducts();
+    
   } catch (error) {
-    console.error("Error fetching products:", error);
+    
     products = [];
   }
-
- 
 
 
 
 
   return (
     <>
-    {products.length === 0 ? (
+    {!user || products.length === 0 ? (
   <section className="max-w-2xl mx-auto px-4 pb-20 text-center mt-20">
           <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12">
             <TrendingDown className="w-16 h-16 text-gray-400 mx-auto mb-4" />
