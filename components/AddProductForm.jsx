@@ -10,20 +10,13 @@ import { createClient } from '@/utils/supabase/client'
 export const AddProductForm =  () => {
   const [url,setUrl]=useState('')
   const [loading, setLoading] = useState(false)
-  const [alert, setAlert] = useState(null) // { type: 'success' | 'error', title: string, message: string }
+  const [alert, setAlert] = useState(null) 
 
   async function handleSubmit(e){
     e.preventDefault();
     setAlert(null); // Clear previous alert
     
-    if (!url) {
-      setAlert({
-        type: 'error',
-        title: 'Heads up!',
-        message: 'Please enter a product URL.'
-      });
-      return;
-    }
+
 
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -33,6 +26,15 @@ export const AddProductForm =  () => {
         type: 'error',
         title: 'Heads up!',
         message: 'Please sign in to add a product.'
+      });
+      return;
+    }
+
+        if (!url) {
+      setAlert({
+        type: 'error',
+        title: 'Heads up!',
+        message: 'Please enter a product URL.'
       });
       return;
     }
